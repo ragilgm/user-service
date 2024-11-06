@@ -1,0 +1,83 @@
+app:
+  id: user-service
+
+
+# configuration server port and cntext path API
+server:
+  port: 8000
+  servlet:
+    context-path: /tuntun/user-service
+
+# configuration application name
+spring:
+  application:
+    name: user-service
+  # kafka
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:localhost}:9092    # Kafka broker address
+    consumer:
+      group-id: user-group                 # Consumer group ID
+      auto-offset-reset: earliest        # Start reading from the earliest message if no offset is present
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    template:
+      default-topic: user-topic            # Default topic for KafkaTemplate
+
+  # nacos
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost}:8848
+
+  # configuration data source master slave
+  datasource:
+    master:
+      url: jdbc:mysql://${TUNTUN_DATABASE_HOST:localhost}:${TUNTUN_DATABASE_PORT:3306}/user_db?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B7
+      username: ${TUNTUN_DATABASE_USER:root}
+      password: ${TUNTUN_DATABASE_PASSWORD:root}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      sql-script-encoding: UTF-8
+      type: com.zaxxer.hikari.HikariDataSource
+    slave:
+      url: jdbc:mysql://${TUNTUN_RO_DATABASE_HOST:localhost}:${TUNTUN_RO_DATABASE_PORT:3306}/user_db?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B7
+      username: ${TUNTUN_RO_DATABASE_USER:root}
+      password: ${TUNTUN_RO_DATABASE_PASSWORD:root}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      sql-script-encoding: UTF-8
+      type: com.zaxxer.hikari.HikariDataSource
+
+  # configuration jpa
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+        format_sql: true
+
+  # configuration flyway
+  flyway:
+    locations: classpath:db/migration
+    url: jdbc:mysql://${TUNTUN_DATABASE_HOST:localhost}:${TUNTUN_DATABASE_PORT:3306}/user_db?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B7
+    user: ${TUNTUN_DATABASE_USER:root}
+    password: ${TUNTUN_DATABASE_PASSWORD:root}
+    placeholderReplacement: false
+
+encrypt:
+  security:
+    secret-key: ${SECRET_KEY:74jtmf9503k58tm3}
+
+
+# eureka
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/  # URL dari Eureka Server
